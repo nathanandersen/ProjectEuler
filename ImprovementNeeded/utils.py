@@ -168,13 +168,6 @@ def digit_sum(n):
     """Returns the sum of all digits in the string/number"""
     return sum(int(digit) for digit in str(n))
 
-def collatz_steps(n):
-    i = 1
-    while (n-1):
-        n = 3*n+1 if n%2 else n/2
-        i += 1
-    return i
-
 def is_triangular_num(n):
     """Returns x for which n is the x-th triangular number (or 0)."""
     x = (math.sqrt(8*n+1)-1)/2
