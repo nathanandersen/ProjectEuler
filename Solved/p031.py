@@ -1,5 +1,11 @@
-
 #Problem 31
+
+# This could probably be improved with a DP.
+
+#real	0m3.362s
+#user	0m3.209s
+#sys	0m0.081s
+
 coins = [1,2,5,10,20,50,100,200]
 global solutions
 solutions = []
