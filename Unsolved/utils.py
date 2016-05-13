@@ -14,6 +14,19 @@ roman_tens = ['','X','XX','XXX','XL','L','LX','LXX','LXXX','XC']
 roman_hundreds = ['','C','CC','CCC','CD','D','DC','DCC','DCCC','CM']
 roman_thousands = ['','M','MM','MMM','MMMM','MMMMM']
 
+def phi(n):
+    """ The Eulerian totient."""
+    result = n
+    i = 2
+    while i * i <= n:
+        if n % i == 0:
+            while n % i == 0:
+                n //= i
+            result -= result // i
+        i += 1
+    if n > 1:
+        result -= result // n
+    return result
 
 def repeating_cycle_len(d):
     s = decimal.Decimal(d)
