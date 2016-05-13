@@ -1,0 +1,1 @@
+I have not yet solved these problems. They are work-in-progress.
