@@ -3,7 +3,7 @@ This repository is dedicated to solving Project Euler challenges.
 There are 3 subdirectories:
 SOLVED is dedicated to problems that I have already solved, and solutions are tagged with their runtimes. I have set a margin of around 2 seconds for most problems.
 
-IMPROVEMENTNEEDED is dedicated to problems that I have solved, but think I could improve my algorithm/implementation on.
+`IMPROVEMENTNEEDED` is dedicated to problems that I have solved, but think I could improve my algorithm/implementation on.
 
 UNSOLVED is dedicated to my active problems that are not yet finished.
 
