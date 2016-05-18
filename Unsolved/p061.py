@@ -14,6 +14,10 @@ hex_nums = set()
 hept_nums = set()
 oct_nums = set()
 
+# can we build a suffix tree for this?
+
+
+
 # construct sets of all nums
 for n in range(1000,10000):
     if is_triangular_num(n): tri_nums.add(n)
