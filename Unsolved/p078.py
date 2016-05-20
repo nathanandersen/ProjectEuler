@@ -9,43 +9,70 @@
 
 # how can we detemine whether the o is unique? the |o is always unique.
 
-# but if we extend, I think, then it's possibly double-counted.
-# some scratch work..
-
-# 1:
-# o
-
-# 2:
-# oo
-# o|o
-# n(2) = 2*n(1) - 0
-
-# 3:
-# ooo
-# oo|o
-# o|o|o
-# n(3) = 2*n(2) - 1
-
-# 4:
-# oooo
-# ooo|o
-# oo|oo
-# oo|o|o
-# o|o|o|o
-# n(4) = 2*n(3) - 1
+# if we extend with a (o), and the relationship between all the groups
+# is no longer in order (the last one is not the smallest), then we don't
+# count it.
+# how to check this?
 
 
-# 5:
-# oooo | o
-# ooooo
-# ooo |oo
-# ooo|o|o
-# oo|oo|o
-# oo|ooo XXX
-# oo|o|o|o
-# oo|o|oo XXX
-# o|o|o|oo XXX
-# o|o|o|o|o
+# Maybe I could implement this with sets of tuples.
+# for each tuple in the prev layer
+# last number += 1, and append 1.
+# then sort the tuple
+# and add it to the set.
+# (then, dispose of the previous set).
 
-# n(5) = 2*n(4) - 3 (why, 3?)
+def make_coin_extensions(tup):
+    if isinstance(tup,int):
+        single = (1,) + (tup,)
+        extended = (tup+1,)
+    else:
+        single = (1,) + tup
+        
+
+        
+prev = set((1,))
+cur = set()
+x = 1
+while True:
+#if True:
+    for coins in prev:
+        if isinstance(coins,int):
+            single = (1,) + (coins,)
+            extended = (coins+1,)
+        else:
+            single = (1,) + coins
+            extended = coins[:len(coins)-2]
+            if isinstance(extended,int):
+                extended = (extended,) + (coins[len(coins-1):]+1,)
+            else:
+                extended = extended + (coins[len(coins-1):]+1,)
+            print(extended)
+
+        cur.add(single)
+        cur.add(extended)
+    if not len(cur) % 1000000:
+        print(x)
+        exit()
+    else:
+        x += 1
+        prev = cur
+        cur = set()
+
+
+#OR.. THIS IS NO GOOD
+
+
+# for each layer....x
+# we determine the # of coins in the LAST group, l
+# then look up n(x-l), and sum that in.
+# n(0) = 1, 1 way to order no coins
+#n = [1]
+
+#def coin_partitions(x):
+#    total = 0
+#    for l in range(1,x+1): # number of coins in last group
+#        total += n(x-l) # number of ways to pre-order that
+        # no... this is not unique
+
 
