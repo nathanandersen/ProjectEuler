@@ -19,7 +19,7 @@ def add_to_fracs(n):
     return count
 
 total = 0
-for n in range(12001):
+for n in range(8):
     print(n)
     total += add_to_fracs(n)
 
