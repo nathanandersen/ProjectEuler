@@ -3,15 +3,17 @@
 # Solving the smaller triangle...
 
 # a
-# b
-# c d e
-# f
+# d
+# e f b
+# c
 # are the labels of the vertices.
 #mathing..
-# a + b + d = 9
+# a + d + f = 9
+# b + e + f = 9
 # c + d + e = 9
-# f + c + b = 9
 # ...
-# a + 2*b + 2*c + 2*d + e + f = 27
+# a + b + c + 2*d + 2*e + 2*f = 27, ok
+# nums 1-6
+# a < b < c, by def'n
 
 # find max..
