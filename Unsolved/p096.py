@@ -23,53 +23,136 @@ import random
 
 
 import queue
-digits = [1,2,3,4,5,6,7,8,9]
+digits = {d for d in range(1,10)}
 sudoku_len = 9
 
+
+def print_puzzle(p):
+    for line in p:
+        for sq in line:
+            if len(sq) is not 1: print("-",end=" ")
+            else: print(sq[0],end= " ")
+        print()
+    print()
+def print_puzzle_pair(orig,solved):
+    for row in range(sudoku_len):
+        for sq in orig[row]:
+            print(sq,end=" ")
+        print("  ",end=" ")
+        for sq in solved[row]:
+            if len(sq) is not 1: print("-",end=" ")
+            else: print(sq[0],end=" ")
+        print()
+    print()
 def is_solved(m):
-    row_vals = [{1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0} for n in range(sudoku_len)]
-    col_vals = [{1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0} for n in range(sudoku_len)]
-    sec_vals = [{1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0} for n in range(sudoku_len)]
-    # 1 2 3
-    # 4 5 6
-    # 7 8 9
+    # Given a solution matrix, m, return if it is a valid solution.
+    row_vals = [{d:0 for d in digits} for n in range(sudoku_len)]
+    col_vals = [{d:0 for d in digits} for n in range(sudoku_len)]
+    sec_vals = [{d:0 for d in digits} for n in range(sudoku_len)]
 
     for y in range(sudoku_len):
         for x in range(sudoku_len):
-            if not m[y][x]: return
-            v = m[y][x]
+            if len(m[y][x]) is not 1: return False
+            v = m[y][x][0]
             row_vals[y][v] += 1
             col_vals[x][v] += 1
             sec = (y//3)*3+(x//3)
             sec_vals[sec][v] += 1
-
     for rv in row_vals:
         for (key,val) in rv.items():
             if val is not 1: return False
-
     for cv in col_vals:
         for (key,val) in cv.items():
             if val is not 1: return False
-
     for sv in sec_vals:
         for (key,val) in sv.items():
             if val is not 1: return False
     return True
+def increment_existing_value(d,key):
+    try: d[key] += 1
+    except KeyError: return
+def update_existing_value(d,key,value):
+    try: d[key]
+    except KeyError: return
+    d[key] = value
+def check_for_uniqueness(vals,indexes,m,s,u):
+    for (k,v) in vals.items():
+        if v is 1:
+            (x,y) = indexes[k]
+            m[y][x] = [k]
+            s[y][x] = True
+            u.add((x,y))
 
-def try_to_remove_sudoku_value(x,y,v,m,s):
-    if s[y][x]:
-        return
-    try:
-        m[y][x].remove(v)
-    except ValueError:
-        pass
+def check_in_section(x,y,m,s,q):
+    row_vals = {d:0 for d in digits}
+    row_indexes = {d:(0,0) for d in digits}
+    for row in range(sudoku_len):
+        if s[row][x]:
+            # If we've seen it, remove it and don't track it\
+            try:
+                row_vals.pop(m[row][x][0])
+            except KeyError:
+                print_puzzle(m)
+                print(x,row,m[row][x])
+            row_indexes.pop(m[row][x][0])
+        else:
+            for v in m[row][x]:
+                increment_existing_value(row_vals,v)
+                update_existing_value(row_indexes,v,(x,row))
 
-def increment_dict(d,key):
-    try:
-        d[key] += 1
-    except KeyError:
-        pass
+    col_vals = {d:0 for d in digits}
+    col_indexes = {d:(0,0) for d in digits}
+    for col in range(sudoku_len):
+        if s[y][col]:
+            # If we've seen it, remove it and don't track it
+            try:
+                col_vals.pop(m[y][col][0])
+            except KeyError:
+                print_puzzle(m)
+                print(col,y,m[y][col])
+            col_indexes.pop(m[y][col][0])
+        else:
+            for v in m[y][col]:
+                increment_existing_value(col_vals,v)
+                update_existing_value(col_indexes,v,(col,y))
 
+
+    sec_vals = {d:0 for d in digits}
+    sec_indexes = {d:(0,0) for d in digits}
+    y_base = (y//3)*3
+    x_base = (x//3)*3
+    for x_inc in range(3):
+        for y_inc in range(3):
+            x_nu = x_base + x_inc
+            y_nu = y_base + y_inc
+            if s[y_nu][x_nu]:
+                try:
+                    sec_vals.pop(m[y_nu][x_nu][0])
+                except KeyError:
+                    print_puzzle(m)
+                    print(x_nu,y_nu,m[y_nu][x_nu])
+                sec_indexes.pop(m[y_nu][x_nu][0])
+            else:
+                for v in m[y_nu][x_nu]:
+                    increment_existing_value(sec_vals,v)
+                    update_existing_value(sec_indexes,v,(x_nu,y_nu))
+
+
+    u = set()
+    check_for_uniqueness(row_vals,row_indexes,m,s,u)
+    check_for_uniqueness(col_vals,col_indexes,m,s,u)
+    check_for_uniqueness(sec_vals,sec_indexes,m,s,u)
+
+    for tup in u:
+        q.put(tup)
+
+def remove_sudoku_value(v,x,y,m,s,q):
+    # Remove value v from m[y][x]
+    if s[y][x]: return
+    try: m[y][x].remove(v)
+    except ValueError: pass
+
+    check_in_section(x,y,m,s,q)
 
 def sudoku_process(x,y,m,s,q):
     # Update all values in the region to not have any of the same
@@ -83,87 +166,36 @@ def sudoku_process(x,y,m,s,q):
     # only one 1, then mark that as finished and push to the
     # queue.
 
-    row_vals = {1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0}
-    for x_row in range(sudoku_len):
-        if s[y][x_row]:
-#            print(x_row,y)
-            row_vals.pop(s[y][x_row])
-        else:
-            for v in m[y][x_row]:
-                increment_dict(row_vals,v)
+    v = m[y][x][0]
+    for col in range(sudoku_len):
+        remove_sudoku_value(v,col,y,m,s,q)
 
-        try_to_remove_sudoku_value(x_row,y,s[y][x],m,s)
+    for row in range(sudoku_len):
+        remove_sudoku_value(v,x,row,m,s,q)
 
-    for (key,val) in row_vals.items():
-        if val is 1:
-            for x_row in range(sudoku_len):
-                if not s[y][x_row] and key in m[y][x_row]:
-                    s[y][x_row] = key
-                    q.put((x_row,y))
-
-    # maintain a dictionary of nums -> occurrences
-    col_vals = {1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0}
-    for y_col in range(sudoku_len):
-        if s[y_col][x]:
-            col_vals.pop(s[y_col][x])
-        else:
-            for v in m[y_col][x]:
-                increment_dict(col_vals,v)
-        try_to_remove_sudoku_value(x,y_col,s[y][x],m,s)
-
-    # if any of them are 1, ie, unique
-    for (key,val) in col_vals.items():
-        if val is 1:
-            for y_col in range(sudoku_len):
-                # mark it, add it to the queue
-                if not s[y_col][x] and key in m[y_col][x]:
-                    s[y_col][x] = key
-                    q.put((x,y_col))
+    y_bd = (y//3)*3
+    x_bd = (x//3)*3
+    for row in range(3):
+        for col in range(3):
+            remove_sudoku_value(v,x_bd+col,y_bd+row,m,s,q)
 
 
-    x_bd = (x // 3) * 3
-    y_bd = (y // 3) * 3
-    sec_vals = {1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0}
-    for x_row in range(3):
-        for y_col in range(3):
-            local_y = y_bd + y_col
-            local_x = x_bd + x_row
-            if s[local_y][local_x]:
-                try:
-                    sec_vals.pop(s[local_y][local_x])
-                except KeyError:
-                    print_puzzle(s)
-                    print(local_x,local_y,s[local_y][local_x])
-                    print(sec_vals)
-                    # Aha! SOmetimes, there are two of the
-                    # same number in a section! That means
-                    # I have made a mistake somewhere!
-                    exit()
+def sudoku_loop(m,s,q):
+    while not q.empty():
+        (x,y) = q.get()
+        print(x,y)
+        sudoku_process(x,y,m,s,q)
 
-            else:
-                for v in m[local_y][local_x]:
-                    increment_dict(sec_vals,v)
-            try_to_remove_sudoku_value(local_x,local_y,
-                                       s[y][x],m,s)
+    # Once we've touched everything.. try again, just once.
 
+    unsolved = []
 
-    for (key,val) in sec_vals.items():
-        if val is 1:
-            for x_row in range(3):
-                for y_col in range(3):
-                    if not s[y_bd+y_col][x_bd+x_row] and key in m[y_bd+y_col][x_bd+x_row]:
-                        s[y_bd+y_col][x_bd+x_row] = key
-                        q.put((x_bd+x_row,y_bd+y_col))
+    for x in range(sudoku_len):
+        for y in range(sudoku_len):
+            if len(m[y][x]) != 1:
+#                print(s[y][x],m[y][x])
+                unsolved.append((x,y))
 
-
-def print_puzzle(p):
-    for line in p:
-        for sq in line:
-            if sq is 0: print("-",end=" ")
-            else: print(sq,end=" ")
-        print()
-
-    print()
 
 def conditional_solve(local_m,local_s):
     # have to build randomness into this
@@ -178,17 +210,15 @@ def conditional_solve(local_m,local_s):
 
     selection = random.randint(0,len(unsolved)-1)
     (x,y) = unsolved[selection]
-    cur_list = m[y][x]
-
-    s[y][x] = cur_list[random.randint(0,len(cur_list)-1)]
+    m[y][x] = [random.choice(m[y][x])]
+    s[y][x] = True
+    print("random choice: ",x,y)
 
     q.put((x,y))
 
-    while not q.empty():
-        (x,y) = q.get()
-        sudoku_process(x,y,m,s,q)
+    sudoku_loop(m,s,q)
 
-    return s
+    return m
 
 
 def solve_sudoku(puzzle,i):
@@ -198,58 +228,57 @@ def solve_sudoku(puzzle,i):
         for n in range(sudoku_len)]
     # m is a matrix of all possible values
 
-    #s maintains final values
-    s = [ [0 for m in range(sudoku_len)]
+    # s is a "seen" matrix
+    s = [ [False for m in range(sudoku_len)]
         for n in range(sudoku_len)]
     q = queue.Queue() # use a queue to maintain the ordering
 
     for y in range(sudoku_len):
         for x in range(sudoku_len):
-            if int(puzzle[y][x]):
-                s[y][x] = int(puzzle[y][x])
+            if int(puzzle[y][x]) != 0:
+                m[y][x] = [int(puzzle[y][x])]
+                s[y][x] = True
                 q.put((x,y))
 
-    while not q.empty():
-        (x,y) = q.get()
-        sudoku_process(x,y,m,s,q)
-        # solves as much as we know for certain, up to here
 
-#    t = m
-    t = s
+    sudoku_loop(m,s,q)
+
+    t = m
+    print_puzzle_pair(puzzle,t)
     while not is_solved(t):
+        print("conditionally solving...")
 #        # do some randomness
         t = conditional_solve(m,s)
-        print_puzzle(t)
-        print(i)
+        print_puzzle_pair(puzzle,t)
 
 
-
-    print_puzzle(puzzle)
-    print_puzzle(t)
+    print_puzzle_pair(puzzle,t)
+    if is_solved(t):
+        print("is solved")
 
     string = ""
     for x in range(3):
-        string += str(t[0][x])
-    print(int(string))
+        string += str(t[0][x][0])
+#    print(int(string))
 
     return int(string)
 
 
+if __name__ == "__main__":
+    puzzles = []
+    cur_puzzle = []
+    f = open("p096_sudoku.txt")
+    f.readline()
+    for line in f:
+        if line.startswith("Grid"):
+            puzzles.append(cur_puzzle)
+            cur_puzzle = []
+        else:
+            cur_puzzle.append(list(line.strip()))
 
-puzzles = []
-cur_puzzle = []
-f = open("p096_sudoku.txt")
-f.readline()
-for line in f:
-    if line.startswith("Grid"):
-        puzzles.append(cur_puzzle)
-        cur_puzzle = []
-    else:
-        cur_puzzle.append(list(line.strip()))
 
-
-top_left_sum = 0
-#solve_sudoku(puzzles[0],0)
-for i in range(len(puzzles)):
-    top_left_sum += solve_sudoku(puzzles[i],i)
-print(top_left_sum)
+    top_left_sum = 0
+#    solve_sudoku(puzzles[2],2)
+    for i in range(len(puzzles)):
+        top_left_sum += solve_sudoku(puzzles[i],i)
+    print(top_left_sum)
