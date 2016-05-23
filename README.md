@@ -1,5 +1,10 @@
 This repository is dedicated to solving Project Euler challenges.
 
+
+```no-highlight
+I have solved 88 problems to date.
+```
+
 There are 3 subdirectories:
 
 `/Solved` is dedicated to problems that I have already solved, and solutions are tagged with their runtimes. I have set a margin of around 2 seconds for most problems.
