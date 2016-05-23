@@ -1,4 +1,5 @@
 # Problem 122
+import sys
 
 # Also looks like DP!
 
@@ -28,3 +29,36 @@
 # to build a[i], where the final values are k,j
 # we will insert into this set:
 # a[k] + a[j] + j + k.
+
+m = [0,0]
+a = [[],[1]]
+
+def calculate_exps_needed(n):
+    min_index = 0
+    min_needed = sys.maxsize
+    for k in range(1,n):
+        exps = 0
+        if n-k in a[k]:
+            exps = 1 + m[k]
+        else:
+            exps = 1 + m[k] + m[n-k]
+        if exps < min_needed:
+            min_needed = exps
+            min_index = k
+
+    m.append(min_needed)
+    s = set()
+    s.update(a[min_index])
+    s.update(a[n-min_index])
+    s.update([n])
+    a.append(s)
+    print(n,min_index)
+
+#for x in range(2,16):
+for x in range(2,201):
+    calculate_exps_needed(x)
+
+#print(m[15])
+#print(a[15])
+print(m)
+print(sum(m))
