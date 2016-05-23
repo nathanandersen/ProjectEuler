@@ -1,8 +1,6 @@
 This repository is dedicated to solving Project Euler challenges.
 
-I have solved ```88``` problems to date.
-
-```no-highlight
+```
 I have solved 88 problems to date.
 ```
 
