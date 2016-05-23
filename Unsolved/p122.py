@@ -5,6 +5,14 @@ import sys
 # Actually, cannot use DP here.
 # https://en.wikipedia.org/wiki/Addition-chain_exponentiation
 
+
+
+
+
+exit()
+# Technically everything below this point is moot.
+
+
 # Also looks like DP!
 
 # We will define a 1-D table, m, which will contain the number of
