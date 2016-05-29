@@ -6,4 +6,4 @@
 
 from utils import sieve
 
-print(sum(p for p in sieve(2000000)))
+print(sum(sieve(2000000)))
