@@ -2,6 +2,13 @@
 from itertools import permutations
 import sys
 
+# So, permutations is a 2^n level bit.
+# There's a clever piece to look for here.
+
+exit()
+
+
+
 # Hideously slow.
 def is_perfect_cube(x):
     x = abs(x)
