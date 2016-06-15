@@ -62,7 +62,70 @@ def removeValFromSquarePossibilities(x,y,v,solution,gridSet):
     except ValueError:
         pass
 
-
+def checkForUniqueValuesInRow(y,solution,gridSet):
+    for d in digits:
+        numOccurrences = 0
+        c = -1
+        for col in range(sudokuLen):
+            if isinstance(solution[y][col],int):
+                if solution[y][col] == d:
+                    numOccurrences = -1
+                    break
+            else:
+                if d in solution[y][col]:
+                    numOccurrences += 1
+                    c = col
+        if numOccurrences == 0:
+            exit() # Error
+        elif numOccurrences == 1:
+            solution[y][c] = d
+            gridSet.add((c,y))
+def checkForUniqueValuesInColumn(x,solution,gridSet):
+    for d in digits:
+        numOccurrences = 0
+        r = -1
+        for row in range(sudokuLen):
+            if isinstance(solution[row][x],int):
+                if solution[row][x] == d:
+                    numOccurrences = -1
+                    break
+            else:
+                if d in solution[row][x]:
+                    numOccurrences += 1
+                    r = row
+        if numOccurrences == 0:
+            exit() # Error
+        elif numOccurrences == 1:
+            solution[r][x] = d
+            gridSet.add((x,r))
+def numOccurrencesInSection(d,xMin,yMin,solution):
+    numOccurrences = 0
+    (posX,posY) = (-1,-1)
+    for dx in range(3):
+        for dy in range(3):
+            if isinstance(solution[yMin+dy][xMin+dx],int):
+                if solution[yMin+dy][xMin+dx] == d:
+                    numOccurrences = -1
+                    return(-1,None,None)
+            else:
+                if d in solution[yMin+dy][xMin+dx]:
+                    numOccurrences += 1
+                    (posX,posY) = (xMin+dx,yMin+dy)
+    return(numOccurrences,posX,posY)
+def checkForUniqueValuesInSection(x,y,solution,gridSet):
+    xMin = (x//3)*3
+    yMin = (y//3)*3
+    for d in digits:
+        (numOccurrences,posX,posY) = numOccurrencesInSection(d,xMin,yMin,solution)
+        if numOccurrences == -1:
+            continue
+        elif numOccurrences == 0:
+            print(d,xMin,yMin)
+            prettyPrint(solution)
+            exit() # Error
+        elif numOccurrences == 1:
+            solution[posY][posX] = d
+            gridSet.add((posX,posY))
 def eliminateInRow(x,y,solution,gridSet):
     for col in range(sudokuLen):
         removeValFromSquarePossibilities(col,y,solution[y][x],solution,gridSet)
@@ -79,6 +142,9 @@ def eliminatePossibilities(x,y,solution,gridSet):
     eliminateInRow(x,y,solution,gridSet)
     eliminateInColumn(x,y,solution,gridSet)
     eliminateInSection(x,y,solution,gridSet)
+    checkForUniqueValuesInRow(y,solution,gridSet)
+    checkForUniqueValuesInColumn(x,solution,gridSet)
+    checkForUniqueValuesInSection(x,y,solution,gridSet)
 
 def prettyPrint(puzzle):
     for col in range(sudokuLen):
@@ -86,7 +152,7 @@ def prettyPrint(puzzle):
             if isinstance(puzzle[col][row],int):
                 print(puzzle[col][row],end=" ")
             else:
-                print("?",end=" ")
+                print(".",end=" ")
         print()
     print()
 
@@ -118,4 +184,4 @@ if __name__ == "__main__":
 
     for p in puzzles:
         solveSudoku(p)
-#    solveSudoku(puzzles[0])
+#    solveSudoku(puzzles[3])
