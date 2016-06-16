@@ -272,8 +272,22 @@ def simpleSmartCheck(p,gridSet):
         for y in range(0,sudokuLen,3):
             checkForUniqueValuesInSection(x,y,p,gridSet)
 
-def checkForUniquePairsInRow(row,p,gridSet):
+def checkForUniquePairsInRow(row,solution,gridSet):
     for col in range(sudokuLen):
+        if isinstance(solution[row][col],int): continue
+        counter = len(solution[row][col])
+        locations = []
+        for x in range(sudokuLen):
+            if solution[row][x] == solution[row][col]:
+                counter -= 1
+                locations.append((x,row))
+        if counter == 0:
+            for x in range(sudokuLen):
+                if (x,row) not in locations:
+                    for d in solution[row][col]:
+                        # remove D from x,row
+                        removeValFromSquarePossibilities(x,row,d,solution,gridSet)
+            # remove all instances of
         # If the entry has length n, and there are n
         # entries that match it (including itself)
         # then remove all other instances of all its
@@ -281,10 +295,31 @@ def checkForUniquePairsInRow(row,p,gridSet):
 def checkForUniquePairsInRows(p,gridSet):
     for row in range(sudokuLen):
         checkForUniquePairsInRow(row,p,gridSet)
+def checkForUniquePairsInColumn(col,solution,gridSet):
+    for row in range(sudokuLen):
+        if isinstance(solution[row][col],int): continue
+        counter = len(solution[row][col])
+        locations = []
+        for y in range(sudokuLen):
+            if solution[y][col] == solution[row][col]:
+                counter -= 1
+                locations.append((col,y))
+        if counter == 0:
+            for y in range(sudokuLen):
+                if (col,y) not in locations:
+                    for d in solution[row][col]:
+                        # remove D from x,row
+                        removeValFromSquarePossibilities(col,y,d,solution,gridSet)
 def checkForUniquePairsInColumns(p,gridSet):
+    for col in range(sudokuLen):
+        checkForUniquePairsInColumn(col,p,gridSet)
+def checkForUniquePairsInSection(x,y,p,gridSet):
+    # TODO
     pass
 def checkForUniquePairsInSections(p,gridSet):
-    pass
+    for x in range(0,sudokuLen,3):
+        for y in range(0,sudokuLen,3):
+            checkForUniquePairsInSections(x,y,p,gridSet)
 def superSmartCheck(p,gridSet):
     # Look for pairs in the same row/col/sect,
     # for example, if two squares in a row have [2,3],
