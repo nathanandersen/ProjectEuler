@@ -272,6 +272,27 @@ def simpleSmartCheck(p,gridSet):
         for y in range(0,sudokuLen,3):
             checkForUniqueValuesInSection(x,y,p,gridSet)
 
+def checkForUniquePairsInRow(row,p,gridSet):
+    for col in range(sudokuLen):
+        # If the entry has length n, and there are n
+        # entries that match it (including itself)
+        # then remove all other instances of all its
+        # contents from the row
+def checkForUniquePairsInRows(p,gridSet):
+    for row in range(sudokuLen):
+        checkForUniquePairsInRow(row,p,gridSet)
+def checkForUniquePairsInColumns(p,gridSet):
+    pass
+def checkForUniquePairsInSections(p,gridSet):
+    pass
+def superSmartCheck(p,gridSet):
+    # Look for pairs in the same row/col/sect,
+    # for example, if two squares in a row have [2,3],
+    # then remove all other 2,3 from that row
+    checkForUniquePairsInSections(p,gridSet)
+    checkForUniquePairsInColumns(p,gridSet)
+    checkForUniquePairsInRows(p,gridSet)
+
 def solveSudoku(p):
     solution = createSolutionMatrix(p)
     gridSet = prepareSet(solution)
@@ -289,8 +310,9 @@ def solveSudoku(p):
             else:
                 iterCount += 1
                 smartCheck(solution,gridSet)
-#                if iterCount > 10:
-#                    superSmartCheck(solution,gridSet)
+
+                if iterCount % 10 == 0:
+                    superSmartCheck(solution,gridSet)
                 if iterCount % 100 == 0:
                     prettyPrint(solution)
 
