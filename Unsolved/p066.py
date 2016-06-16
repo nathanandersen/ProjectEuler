@@ -7,21 +7,20 @@
 # From the Knuth text.
 
 def euclid_gcd(a,b):
-    a = a.copy()
-    b = b.copy()
     while True:
         r = a % b
         if r == 0:
             return b
         else:
+            m1 = a // b
             t1 = a
             t2 = b
             t3 = r
             a = t2
             b = t3
+            print(t1,"=",a,"*",m1,"+",b)
 
 # Once we have the GCD, we have to build back up.
 
 
-
-exit()
+print(euclid_gcd(17,5))

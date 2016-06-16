@@ -138,41 +138,115 @@ def isSolved(p):
                 return False
     return True
 
-def smartCheckSectionsByRow(p,gridSet):
-    # If a digit is missing in a section, and is only
-    # available in a certain row, then remove it from
-    # the rest of the section
-    for d in digits:
-        pass
-def smartCheckSectionsByColumn(p,gridSet):
-    pass
-
-
-def findOccurrencesInRow(d,p,row):
+def findOccurrencesInRow(digit,puzzle,row):
     occurrences = []
     for col in range(sudokuLen):
-        if isinstance(p[row][col],int):
-            if p[row][col] == d:
+        if isinstance(puzzle[row][col],int):
+            if puzzle[row][col] == digit:
                 return None
-        elif d in p[row][col]:
-            occurrences.append((col,row))
+        elif digit in puzzle[row][col]:
+            occurrences.append(col)
     return occurrences
-def smartCheckRowsBySection(p,gridSet):
-        # If a digit is missing in a row,
-        # and is only available in a certain section
-        #, then remove it from the rest of the row
+def findOccurrencesInColumn(digit,puzzle,col):
+    occurrences = []
+    for row in range(sudokuLen):
+        if isinstance(puzzle[row][col],int):
+            if puzzle[row][col] == digit:
+                return None
+        elif digit in puzzle[row][col]:
+            occurrences.append(row)
+    return occurrences
 
-    for d in digits:
-        for sect in range(sudokuLen):
-            rowOccurrences = findOccurrencesInRow(d,p,sect)
-            sectOccurrences = findOccurrencesInSection(d,p,sect)
-            # If those occurrences
-            # are the only ones in the section
+def occurrencesInSameSection(occ):
+    if len(occ) > 3:
+        return False
+    if len(occ) == 3:
+        return occ[0]//3 == occ[1]//3 and occ[1]//3 == occ[2]//3
+    elif len(occ) == 2:
+        return occ[0]//3 == occ[1]//3
+    else:
+        return True
+def smartCheckSectionsByRow(puzzle,gridSet):
+    # For each row, if say, 2 is only available in the
+    # pieces of the row in that section, remove it everywhere
+    # else in that section.
+    for row in range(sudokuLen):
+        sectY = row//3 * 3
+        for digit in digits:
+            occurrences = findOccurrencesInRow(digit,puzzle,row)
+            if occurrences is not None and occurrencesInSameSection(occurrences):
+                sectX = occurrences[0] // 3 * 3
+                for dx in range(3):
+                    for dy in range(3):
+                        if sectX+dx not in occurrences:
+                            removeValFromSquarePossibilities(sectX+dx,sectY+dy,digit,puzzle,gridSet)
 
+def smartCheckSectionsByColumn(puzzle,gridSet):
+    # BUG
+    for col in range(sudokuLen):
+        sectX = col//3 * 3
+        for digit in digits:
+            occurrences = findOccurrencesInColumn(digit,puzzle,col)
+            if occurrences is not None and occurrencesInSameSection(occurrences):
+                sectY = occurrences[0] // 3 * 3
+                for dx in range(3):
+                    for dy in range(3):
+                        if sectY+dy not in occurrences:
+                            removeValFromSquarePossibilities(sectX+dx,sectY+dy,digit,puzzle,gridSet)
 
-    pass
-def smartCheckColumnsBySection(p,gridSet):
-    pass
+def occurrencesInSameRow(occ):
+    # Should these be [0][0] or [0][1]
+    if len(occ) > 3:
+        return False
+    if len(occ) == 3:
+        return occ[0][0]//3 == occ[1][0]//3 and occ[1][0]//3 == occ[2][0]//3
+    elif len(occ) == 2:
+        return occ[0][0]//3 == occ[1][0]//3
+    else:
+        return True
+def occurrencesInSameColumn(occ):
+    if len(occ) > 3:
+        return False
+    if len(occ) == 3:
+        return occ[0][1]//3 == occ[1][1]//3 and occ[1][1]//3 == occ[2][1]//3
+    elif len(occ) == 2:
+        return occ[0][1]//3 == occ[1][1]//3
+    else:
+        return True
+def findOccurrencesInSection(digit,puzzle,xMin,yMin):
+    o = []
+    for dx in range(3):
+        for dy in range(3):
+            if isinstance(puzzle[yMin+dy][xMin+dx],int):
+                if puzzle[yMin+dy][xMin+dx] == digit:
+                    return None
+            elif digit in puzzle[yMin+dy][xMin+dx]:
+                o.append((xMin+dx,yMin+dy))
+    return o
+def smartCheckRowsBySection(puzzle,gridSet):
+    for xMin in range(0,sudokuLen,3):
+        for yMin in range(0,sudokuLen,3):
+            for digit in digits:
+                occurrences = findOccurrencesInSection(digit,puzzle,xMin,yMin)
+                if occurrences is not None and occurrencesInSameRow(occurrences):
+                    # iterate over the row and remove everything not in occurrences
+                    print(occurrences,digit,xMin,yMin)
+                    prettyPrint(puzzle)
+                    row = occurrences[0][0]
+                    for col in range(sudokuLen):
+                        if (row,col) not in occurrences:
+                            removeValFromSquarePossibilities(col,row,digit,puzzle,gridSet)
+def smartCheckColumnsBySection(puzzle,gridSet):
+    for xMin in range(0,sudokuLen,3):
+        for yMin in range(0,sudokuLen,3):
+            for digit in digits:
+                occurrences = findOccurrencesInSection(digit,puzzle,xMin,yMin)
+                if occurrences is not None and occurrencesInSameColumn(occurrences):
+                    # iterate over the row and remove everything not in occurrences
+                    col = occurrences[0][1]
+                    for row in range(sudokuLen):
+                        if (row,col) not in occurrences:
+                            removeValFromSquarePossibilities(col,row,digit,puzzle,gridSet)
 
 def smartCheck(p,gridSet):
     # If a section is lacking value v, and v is only possible
