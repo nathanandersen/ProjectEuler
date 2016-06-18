@@ -8,8 +8,9 @@ def inclusiveFactorCount(n):
     return 1 + factor_count(n)
 
 total = 0
+topLimit = 10**7
 prevCt = inclusiveFactorCount(2)
-for n in range(3,1000000):
+for n in range(3,topLimit+1):
     ifc = inclusiveFactorCount(n)
     if ifc == prevCt:
         total += 1
