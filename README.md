@@ -3,7 +3,7 @@
 This repository is dedicated to my solutions for Project Euler challenges.
 
 ```
-I have solved 92 problems to date.
+I have solved 93 problems to date.
 ```
 
 There are 3 subdirectories:

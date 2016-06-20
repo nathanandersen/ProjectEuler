@@ -17,11 +17,6 @@ def rect_count(x,y):
     x2 = x**2
     y2 = y**2
     return int(((x2*y2) + (x*y2) + (x2*y) + (x*y))/4)
-#    total = 0
-#    for a in range(1,x+1):
-#        for b in range(1,y+1):
-#            total += a*b
-#    return total
 
 print(rect_count(3,2))
 print(rect_count(4,2))
