@@ -4,17 +4,18 @@ total = 0
 # a 81-length list
 
 def sameRow(i,j):
-    return (i/9 == j/9)
+    return (i//9 == j//9)
 
 def sameCol(i,j):
     return ((i-j)%9 == 0)
 
 def sameSection(i,j):
-    return (i/27 == j/27 and (i % 9)/3 == (j % 9)/3)
+    return (i//27 == j//27 and (i % 9)//3 == (j % 9)//3)
 
 
 def solve(puzzArr):
-    print(puzzArr)
+    if puzzArr == "": return
+#    print(puzzArr)
     global total
     i = puzzArr.find('0')
     if i is -1:
@@ -24,6 +25,7 @@ def solve(puzzArr):
     for j in range(81):
         if sameRow(i,j) or sameCol(i,j) or sameSection(i,j):
             invalidOptions.add(puzzArr[j])
+#    print(invalidOptions)
     for option in '123456789':
         if option not in invalidOptions:
             solve(puzzArr[:i] + option + puzzArr[i+1:])
@@ -31,9 +33,8 @@ def solve(puzzArr):
 
 if __name__ == "__main__":
     f = open("p096_sudoku.txt")
-    f.readline()
     curPuzzle = ""
-    num = 0
+    num = 1
     for line in f:
         if line.startswith("Grid"):
             print(num)

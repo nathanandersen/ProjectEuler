@@ -356,9 +356,7 @@ def superSmartCheck(p,gridSet):
 
 def findGroupOfTwo(p):
     xs = [x for x in range(sudokuLen)]
-    shuffle(xs)
     ys = [y for y in range(sudokuLen)]
-    shuffle(ys)
     for x in xs:
         for y in ys:
             if isinstance(p[y][x],int): continue
@@ -370,7 +368,6 @@ def findGroupOfTwo(p):
 def conditionalSolve(p,first=True):
     q = set()
     (_x,_y) = findGroupOfTwo(p)
-#    prettyPrint(p)
     if _x is -1 or _y is -1:
         print("Couldn't find any pairs.")
         exit()
@@ -386,8 +383,6 @@ def conditionalSolve(p,first=True):
             _p = copy.deepcopy(p)
             choice = (choice + 1) % 2
             removeValFromSquarePossibilities(_x,_y,_p[_y][_x][choice],_p,q)
-
-#        print(_x,_y,"was valid first choice.")
         q.add((_x,_y))
         while True:
             try:
@@ -396,12 +391,10 @@ def conditionalSolve(p,first=True):
                 if isSolved(_p):
                     return _p
                 else:
-                    print("conditionally solving now")
                     _p = conditionalSolve(_p,first)
             try:
                 eliminatePossibilities(x,y,_p,q)
             except Exception:
-                print("restarting conditional solve with other choice")
                 return conditionalSolve(p, not first)
 
 def solveSudoku(p):
@@ -414,10 +407,7 @@ def solveSudoku(p):
             (x,y) = gridSet.pop()
             eliminatePossibilities(x,y,solution,gridSet)
         except KeyError:
-
             if isSolved(solution):
-                prettyPrint(solution)
-                print("solved in",iterCount,"attempts")
                 valueString = "".join(str(s) for s in solution[0][0:3])
                 return int(valueString)
             else:
@@ -432,24 +422,20 @@ def solveSudoku(p):
 
 
 if __name__ == "__main__":
-    puzzles = []
     curPuzzle = []
     topLeftSum = 0
     f = open("p096_sudoku.txt")
-    f.readline()
-    puzzleCount = 0
-    for line in f:
-        if line.startswith("Grid"):
-#            print("solving a puzzle.")
-            puzzles.append(curPuzzle)
-            print("solved puzzle",puzzleCount)
-            v = solveSudoku(curPuzzle)
-            print(v)
-            topLeftSum += v
-#            topLeftSum += solveSudoku(curPuzzle)
-            curPuzzle = []
-            puzzleCount += 1
-        else:
+    lines = f.readlines()
+    puzzleCount = 1
+    i = 0
+    while i < len(lines):
+        print(i//10 + 1)
+        line = lines[i]
+        i += 1
+        curPuzzle = []
+        for n in range(9):
+            line = lines[i]
+            i += 1
             curPuzzle.append(list(line.strip()))
-
+        topLeftSum += solveSudoku(curPuzzle)
     print(topLeftSum)
