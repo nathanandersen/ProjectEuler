@@ -1,5 +1,7 @@
 # Problem 96
 # Solving Sudoku
+import copy
+from random import shuffle
 
 digits = {d for d in range(1,10)}
 sudokuLen = 9
@@ -66,8 +68,9 @@ def checkForUniqueValuesInRow(y,solution,gridSet):
                     numOccurrences += 1
                     c = col
         if numOccurrences == 0:
-            print("error in row")
-            exit() # Error
+#            print("error in row",y,", couldn't find", d)
+#            prettyPrint(solution)
+            raise Exception()
         elif numOccurrences == 1:
             solution[y][c] = d
             gridSet.add((c,y))
@@ -85,8 +88,11 @@ def checkForUniqueValuesInColumn(x,solution,gridSet):
                     numOccurrences += 1
                     r = row
         if numOccurrences == 0:
-            print("error in col")
-            exit() # Error
+            print("error in col",x,", couldn't find", d)
+            prettyPrint(solution)
+            raise Exception()
+#            print("error in col")
+#            exit() # Error
         elif numOccurrences == 1:
             solution[r][x] = d
             gridSet.add((x,r))
@@ -112,10 +118,11 @@ def checkForUniqueValuesInSection(x,y,solution,gridSet):
         if numOccurrences == -1:
             continue
         elif numOccurrences == 0:
-            print("error in section")
-            print(d,xMin,yMin)
-            prettyPrint(solution)
-            exit() # Error
+            raise Exception()
+#            print("error in section")
+#            print(d,xMin,yMin)
+#            prettyPrint(solution)
+#            exit() # Error
         elif numOccurrences == 1:
             solution[posY][posX] = d
             gridSet.add((posX,posY))
@@ -342,6 +349,64 @@ def superSmartCheck(p,gridSet):
     checkForUniquesInColumns(p,gridSet)
     checkForUniquesInRows(p,gridSet)
 
+def findGroupOfTwo(p):
+    xs = [x for x in range(sudokuLen)]
+    shuffle(xs)
+    ys = [y for y in range(sudokuLen)]
+    shuffle(ys)
+    for x in xs:
+        for y in ys:
+            if isinstance(p[y][x],int): continue
+            elif len(p[y][x]) == 2:
+                return (x,y)
+
+    return (-1,-1)
+
+def conditionalSolve(p,choice):
+    q = set()
+    (_x,_y) = findGroupOfTwo(p)
+    prettyPrint(p)
+    if _x is -1 or _y is -1:
+        print("Couldn't find any pairs.")
+        exit()
+    else:
+        try:
+            _p = copy.deepcopy(p)
+            removeValFromSquarePossibilities(_x,_y,_p[_y][_x][choice],_p,q)
+        except Exception:
+            _p = copy.deepcopy(p)
+            if choice is 0:
+                choice = 1
+            else:
+                choice = 0
+            print(choice)
+            removeValFromSquarePossibilities(_x,_y,_p[_y][_x][choice],_p,q)
+
+        print(_x,_y,"was valid first choice.")
+        while True:
+            try:
+                (x,y) = q.pop()
+                try:
+                    eliminatePossibilities(x,y,_p,q)
+                except Exception:
+                    print("starting conditional solve over..")
+                    return conditionalSolve(p, choice+1 % 2)
+            except KeyError:
+                print("was key error?")
+#                prettyPrint(_p)
+                if isSolved(_p):
+                    return _p
+                else:
+                    return conditionalSolve(_p,choice+1 % 2)
+#                    prettyPrint(_p)
+#                    print("Exiting..")
+#                    exit()
+
+
+    # Find a pair-group
+    # Pick one of the values, assign it, and proceed.
+    # If it fails, then... try the other one?
+
 def solveSudoku(p):
     solution = createSolutionMatrix(p)
     gridSet = prepareSet(solution)
@@ -363,7 +428,7 @@ def solveSudoku(p):
                 if iterCount % 10 == 0:
                     superSmartCheck(solution,gridSet)
                 if iterCount % 100 == 0:
-                    prettyPrint(solution)
+                    solution = conditionalSolve(solution,0)
 
 
 
@@ -373,12 +438,15 @@ if __name__ == "__main__":
     topLeftSum = 0
     f = open("p096_sudoku.txt")
     f.readline()
+    puzzleCount = 0
     for line in f:
         if line.startswith("Grid"):
 #            print("solving a puzzle.")
             puzzles.append(curPuzzle)
+            print("solved puzzle",puzzleCount)
             topLeftSum += solveSudoku(curPuzzle)
             curPuzzle = []
+            puzzleCount += 1
         else:
             curPuzzle.append(list(line.strip()))
 
