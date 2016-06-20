@@ -88,8 +88,8 @@ def checkForUniqueValuesInColumn(x,solution,gridSet):
                     numOccurrences += 1
                     r = row
         if numOccurrences == 0:
-            print("error in col",x,", couldn't find", d)
-            prettyPrint(solution)
+#            print("error in col",x,", couldn't find", d)
+#            prettyPrint(solution)
             raise Exception()
 #            print("error in col")
 #            exit() # Error
@@ -150,6 +150,11 @@ def isSolved(p):
         for y in range(sudokuLen):
             if not isinstance(p[y][x],int):
                 return False
+    for row in p:
+        if len(set(row)) is not 9:
+            print("uh oh!!!")
+            exit()
+            return False
     return True
 def findOccurrencesInRow(digit,puzzle,row):
     occurrences = []
@@ -362,50 +367,42 @@ def findGroupOfTwo(p):
 
     return (-1,-1)
 
-def conditionalSolve(p,choice):
+def conditionalSolve(p,first=True):
     q = set()
     (_x,_y) = findGroupOfTwo(p)
-    prettyPrint(p)
+#    prettyPrint(p)
     if _x is -1 or _y is -1:
         print("Couldn't find any pairs.")
         exit()
     else:
+        _p = copy.deepcopy(p)
+        if first:
+            choice = 0
+        else:
+            choice = 1
         try:
-            _p = copy.deepcopy(p)
             removeValFromSquarePossibilities(_x,_y,_p[_y][_x][choice],_p,q)
         except Exception:
             _p = copy.deepcopy(p)
-            if choice is 0:
-                choice = 1
-            else:
-                choice = 0
-            print(choice)
+            choice = (choice + 1) % 2
             removeValFromSquarePossibilities(_x,_y,_p[_y][_x][choice],_p,q)
 
-        print(_x,_y,"was valid first choice.")
+#        print(_x,_y,"was valid first choice.")
+        q.add((_x,_y))
         while True:
             try:
                 (x,y) = q.pop()
-                try:
-                    eliminatePossibilities(x,y,_p,q)
-                except Exception:
-                    print("starting conditional solve over..")
-                    return conditionalSolve(p, choice+1 % 2)
             except KeyError:
-                print("was key error?")
-#                prettyPrint(_p)
                 if isSolved(_p):
                     return _p
                 else:
-                    return conditionalSolve(_p,choice+1 % 2)
-#                    prettyPrint(_p)
-#                    print("Exiting..")
-#                    exit()
-
-
-    # Find a pair-group
-    # Pick one of the values, assign it, and proceed.
-    # If it fails, then... try the other one?
+                    print("conditionally solving now")
+                    _p = conditionalSolve(_p,first)
+            try:
+                eliminatePossibilities(x,y,_p,q)
+            except Exception:
+                print("restarting conditional solve with other choice")
+                return conditionalSolve(p, not first)
 
 def solveSudoku(p):
     solution = createSolutionMatrix(p)
@@ -419,8 +416,10 @@ def solveSudoku(p):
         except KeyError:
 
             if isSolved(solution):
+                prettyPrint(solution)
                 print("solved in",iterCount,"attempts")
-                return solution[0][0]*100 + solution[0][1]*10 + solution[0][2]
+                valueString = "".join(str(s) for s in solution[0][0:3])
+                return int(valueString)
             else:
                 iterCount += 1
                 smartCheck(solution,gridSet)
@@ -428,7 +427,7 @@ def solveSudoku(p):
                 if iterCount % 10 == 0:
                     superSmartCheck(solution,gridSet)
                 if iterCount % 100 == 0:
-                    solution = conditionalSolve(solution,0)
+                    solution = conditionalSolve(solution)
 
 
 
@@ -444,7 +443,10 @@ if __name__ == "__main__":
 #            print("solving a puzzle.")
             puzzles.append(curPuzzle)
             print("solved puzzle",puzzleCount)
-            topLeftSum += solveSudoku(curPuzzle)
+            v = solveSudoku(curPuzzle)
+            print(v)
+            topLeftSum += v
+#            topLeftSum += solveSudoku(curPuzzle)
             curPuzzle = []
             puzzleCount += 1
         else:
