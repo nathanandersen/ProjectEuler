@@ -295,7 +295,7 @@ def checkForUniquesInRow(row,solution,gridSet):
                 locations.append((x,row))
         if counter == 0:
             for x in range(sudokuLen):
-                if (x,row) not in locations:
+                if (x,row) not in locations and not isinstance(solution[row][x],int):
                     for d in solution[row][col]:
                         # remove D from x,row
                         removeValFromSquarePossibilities(x,row,d,solution,gridSet)
@@ -318,7 +318,7 @@ def checkForUniquesInColumn(col,solution,gridSet):
                 locations.append((col,y))
         if counter == 0:
             for y in range(sudokuLen):
-                if (col,y) not in locations:
+                if (col,y) not in locations and not isinstance(solution[y][col],int):
                     for d in solution[row][col]:
                         # remove D from x,row
                         removeValFromSquarePossibilities(col,y,d,solution,gridSet)
@@ -339,7 +339,7 @@ def checkForUniquesInSection(x,y,solution,gridSet):
             if counter == 0:
                 for _dx in range(3):
                     for _dy in range(3):
-                        if (x+_dx,y+_dy) not in locations:
+                        if (x+_dx,y+_dy) not in locations and not isinstance(solution[y+_dy][x+_dx],int):
                             for d in solution[y+dy][x+dx]:
                                 removeValFromSquarePossibilities(x+_dx,y+_dy,d,solution,gridSet)
 def checkForUniquesInSections(p,gridSet):
@@ -350,6 +350,7 @@ def superSmartCheck(p,gridSet):
     # Look for pairs in the same row/col/sect,
     # for example, if two squares in a row have [2,3],
     # then remove all other 2,3 from that row
+    smartCheck(p,gridSet)
     checkForUniquesInSections(p,gridSet)
     checkForUniquesInColumns(p,gridSet)
     checkForUniquesInRows(p,gridSet)
@@ -412,11 +413,8 @@ def solveSudoku(p):
                 return int(valueString)
             else:
                 iterCount += 1
-                smartCheck(solution,gridSet)
-
-                if iterCount % 10 == 0:
-                    superSmartCheck(solution,gridSet)
-                if iterCount % 100 == 0:
+                superSmartCheck(solution,gridSet)
+                if iterCount % 5 == 0:
                     solution = conditionalSolve(solution)
 
 
