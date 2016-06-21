@@ -16,10 +16,12 @@ def phi_ratio_if_is_perm(n):
 
 min_index = 0
 min_val = sys.maxsize
-for n in range(3,10**7,2):
+for n in reversed(range(3,10**7,2)):
     v = phi_ratio_if_is_perm(n)
     if v < min_val:
         print(n,v)
         (min_index,min_val) = (n,v)
 
 print(min_index,min_val)
+# Hits the min value, but keeps going
+#8319823
