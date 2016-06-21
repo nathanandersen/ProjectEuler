@@ -1,6 +1,6 @@
 # Problem 66
 # Diophantine equations
-
+from utils import is_square_num
 
 
 # Take the euclidean algorithm
