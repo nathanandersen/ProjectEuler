@@ -14,15 +14,11 @@
 # single black block at the end.
 # Looks like O(n^2).
 
-n = [1]
+n = {0:1}
 def tile_count(x):
-    total = n[x-1]
-    for i in range(3,x+1):
-        if i is x: total += 1
-        else: total += n[x-i-1]
-    return total
+    return n[x-1] + sum(1 if i == x else n[x-i-1] for i in range(3,x+1))
 
 for x in range(1,51):
-    n.append(tile_count(x))
+    n[x] = tile_count(x)
 
 print(n[50])
