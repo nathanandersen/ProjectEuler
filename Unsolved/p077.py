@@ -22,4 +22,4 @@ primes = sieve(1000)
 
 # so we will iterate over everything in everything up
 # to x, make a new set of tuples,
-
+prime_ways = {0:0,1:0
