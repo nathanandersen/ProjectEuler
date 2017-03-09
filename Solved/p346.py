@@ -7,10 +7,7 @@ upperLim = 40 # 40 1's, for base 2
 
 def evalBase(length,b):
     # Evaluate string n in base b
-    t = 0
-    for i in range(length):
-        t += b ** i
-    return t
+    return sum(b**i for i in range(length))
 
 def calcRepunits(length):
     base = 2
