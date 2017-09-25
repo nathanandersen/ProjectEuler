@@ -1,0 +1,6 @@
+eulerian totient:
+
+for any prime p, phi(p^n) = p^n - p^(n-1) = p^(n-1) * (p-1)
+
+for relatively prime m,n:
+phi(m n) = phi(m) * phi(n)
