@@ -14,19 +14,48 @@ roman_tens = ['','X','XX','XXX','XL','L','LX','LXX','LXXX','XC']
 roman_hundreds = ['','C','CC','CCC','CD','D','DC','DCC','DCCC','CM']
 roman_thousands = ['','M','MM','MMM','MMMM','MMMMM']
 
+#@Memoize
+def phi_one_factor(p,n):
+    return p**(n-1) * (p-1)
+
+#@Memoize
 def phi(n):
     """ The Eulerian totient."""
-    result = n
-    i = 2
-    while i * i <= n:
-        if n % i == 0:
-            while n % i == 0:
-                n //= i
-            result -= result // i
-        i += 1
-    if n > 1:
-        result -= result // n
-    return result
+    if n == 1:
+        return 1
+    if is_prime(n):
+        return n-1
+    result = 1
+    for p in __primes:
+        if not(n % p):
+            break
+    # If p does not divide, then ignore p
+    factor_count = 1
+    while (n % (p ** factor_count) == 0):
+        factor_count += 1
+    factor_count -= 1 # 1 too-many
+    return phi_one_factor(p,factor_count) * phi(n // (p**factor_count))
+
+    # else, if not prime
+    # \phi(mn) = \phi(m) \phi(n) if relatively prime
+    # so maybe:
+    # for p in primes
+    # if (p % n == 0): # p divides n
+    # then we see how many 'p' we can pull out
+    # also compute a DP of this maybe?
+
+
+    #result = n
+    #i = 2
+    #while i * i <= n:
+    #    if n % i == 0:
+    #        while n % i == 0:
+    #            n //= i
+    #        result -= result // i
+    #    i += 1
+    #if n > 1:
+    #    result -= result // n
+    #return result
 
 def repeating_cycle_len(d):
     s = decimal.Decimal(d)
